@@ -378,7 +378,28 @@ public class Utility {
         }
     }
 
-    //Сравнить две команды по средним баллам и среднему возрасту участников.
-    public static
+    //Сравнить две команды по  баллам и среднему возрасту участников.
+    //Compare two teams in average points and middle age participants
+    public static void compareTwoTeamsPointsAndMiddleAge(String teamName,
+                                                         String teamName1) {
+        Map<Map<Team<Participant>, Double>, Float> teamList = Handler.getTeamsMap().entrySet().stream()
+                .filter(teamEntry -> teamEntry.getKey().getName().equals(teamName) ||
+                        teamEntry.getKey().getName().equals(teamName1))
+                .collect(Collectors.toMap(
+                        teamEntry -> {
+                            Team<Participant> team = teamEntry.getKey();
+                            Double averageAge = team.getParticipants().stream()
+                                    .collect(Collectors.averagingDouble(Participant::getAge));
+                            return Map.of(team, averageAge);
+                        },
+                        Map.Entry::getValue));
 
+        for (Map.Entry<Map<Team<Participant>, Double>, Float> entry : teamList.entrySet()) {
+            System.out.println("Team: " + entry.getKey().keySet().iterator().next().getName() +
+                    ", Average Age: " + entry.getKey().values().iterator().next() +
+                    ", Float Value: " + entry.getValue());
+        }
+
+    }
 }
+

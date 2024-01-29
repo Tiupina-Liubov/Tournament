@@ -89,9 +89,12 @@ public class Test {
         System.out.println(Utility.findListTeamsThatDrawWithGivenTeam(Handler.getListGamingStatistics(), teamName));
 
         System.out.println("Вывести результаты всех игр между двумя конкретными командами.");
-        Team<Adult> adultTeam = Utility.getTeam(Handler.getMapAdult(), 20);
+        Team<Adult> adultTeam = Utility.getTeam(Handler.getMapAdult(), 4);
         Team<Adult> adultTeam1 = Utility.getTeam(Handler.getMapAdult(), 1);
         Utility.printResultOfAllGamesSpecificTeams(adultTeam, adultTeam1);
+
+        System.out.println("Сравнить две команды по  баллам и среднему возрасту участников.");
+        Utility.compareTwoTeamsPointsAndMiddleAge(adultTeam1.getName(),adultTeam.getName());
 
 
     }
