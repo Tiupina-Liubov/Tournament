@@ -1,13 +1,17 @@
 package src.metods;
 
+import src.blocks.Game;
 import src.blocks.Handler;
 import src.enams.Category;
 import src.objectClass.Participant;
 import src.objectClass.Team;
 
 import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 public class Utility {
+    public static final Random RANDOM = new Random();
 
 
     public static <T extends Participant> Team<T> maxCouch(Map<Team<T>, Float> teamMap) {
@@ -65,13 +69,11 @@ public class Utility {
     }
 
     public static float averageValue(Collection<Float> list) {
-        float average = 0.0f;
+        return list.stream()
+                .reduce(Float::sum)
+                .map(f -> f / list.size())
+                .orElse(0.0f);
 
-        for (Float i : list) {
-            average += i;
-        }
-
-        return average /= list.size();
     }
 
     public static <T extends Participant> Map<Team<T>, Float> aboveTheAverage(Map<Team<T>, Float> mapParticipant) {
@@ -156,7 +158,7 @@ public class Utility {
         for (Team<Participant> team : map.keySet()) {
 
             if (allNumbersThisRange(team, bottom, upper)) {
-               teams.add(team);
+                teams.add(team);
             }
         }
         return teams;
@@ -178,7 +180,7 @@ public class Utility {
         return b;
     }
 
-    static void showParticipantsDescendingOrderAge(List<Participant> participantList) {
+    public static void showParticipantsDescendingOrderAge(List<Participant> participantList) {
         Comparator<Participant> participantComparator = Participant::compareTo;
         participantList.sort(participantComparator);
 
@@ -212,7 +214,7 @@ public class Utility {
         return sum;
     }
 
-    static Map<Map<String, String>, Integer> haveSameTotalAge(Map<Team<Participant>, Float> map) {
+    public static Map<Map<String, String>, Integer> haveSameTotalAge(Map<Team<Participant>, Float> map) {
         Map<Map<String, String>, Integer> teamsOfSameTotalAge = new HashMap<>();
         Map<Team<Participant>, Integer> mapTeamTotalAge = determiningAmountOfAge(map);
 
@@ -249,7 +251,7 @@ public class Utility {
         return mapTeamTotalAge;
     }
 
-    static void showTeamAverageScores() {
+    public static void showTeamAverageScores() {
         System.out.println("Average scores " + Category.TEENAGER.name() +
                 " = " + averageValue(Handler.getMapTeenager().values()));
 
@@ -260,50 +262,13 @@ public class Utility {
                 " = " + averageValue(Handler.getMapAdult().values()));
     }
 
-//    static <T extends Participant> void outputOfGameResults(Team<T> team1, Team<T> team2) {
-//        Map<String, String> stringMap = Game.newMapNameTeamsPlay(team1, team2);
-//        Map<String, String> stringMap1 = Game.newMapNameTeamsPlay(team2, team1);
-//
-//        List<Float> listTeam1 = new ArrayList<>();
-//        List<Float> listTeam2 = new ArrayList<>();
-//
-//        if (!Handler.getListGamingStatistics().containsKey(stringMap)) {
-//            System.out.println("These teams didn't play");
-//
-//        } else {
-//
-//            for (Map.Entry<Map<String, String>, List<Float>> map : Handler.getListGamingStatistics().entrySet()) {
-//                Map<String, String> mapStr = map.getKey();
-//
-//                if (stringMap.equals(mapStr)) {
-//                    System.out.println(stringMap + "1");
-//                    listTeam1.addAll(map.getValue());
-//                }
-//
-//                if (stringMap1.equals(mapStr)) {
-//                    System.out.println(stringMap1 + "2");
-//                    listTeam2.addAll(map.getValue());
-//                }
-//            }
-//            System.out.println(stringMap1.entrySet());
-//
-//            for (int i = 0; i < listTeam1.size(); i++) {
-//                System.out.println(listTeam1.get(i) + " : " + listTeam2.get(i));
-//            }
-//        }
-//    }
-
-    static Set<String> undefeatedTeamList(Map<Map<String, String>, List<Float>> map) {
+    public static Set<String> undefeatedTeamList(Map<String, List<Float>> map) {
         Set<String> setTeams = new HashSet<>();
 
-        for (Map.Entry<Map<String, String>, List<Float>> m : map.entrySet()) {
+        for (Map.Entry<String, List<Float>> m : map.entrySet()) {
 
             if (!m.getValue().contains(0.0f)) {
-
-                for (Map.Entry<String, String> strMap : m.getKey().entrySet()) {
-                    setTeams.add(strMap.getKey());
-                    setTeams.add(strMap.getValue());
-                }
+                setTeams.add(m.getKey().split(" - ")[0]);
             }
         }
 
@@ -342,5 +307,78 @@ public class Utility {
 //
 //        return showLongestWinningStreakMap;
 //    }
+
+    public static List<String> teamsWithWinsOverSpecificTeam(String teamName) {
+        return Handler.getListGamingStatistics().entrySet().stream()
+                .filter(entry -> entry.getKey().split(" - ")[0].equals(teamName) && entry.getValue().contains(0.0f))
+                .map(entry -> entry.getKey().split(" - ")[1])
+                .toList();
+
+    }
+
+    //Найти команды, чьи баллы улучшались с каждой игрой.
+    //Find teams whose scores improved with each game.
+    public static Set<String> findTeamsWhoseScoresImprovedEachGame(Map<String, List<Float>> map) {
+        return map.entrySet().stream()
+                .filter(entry -> (entry.getValue().stream()
+                        .filter(f -> f > 0.0f).count()) == entry.getValue().size())
+                .map(entry -> entry.getKey().split(" - ")[0])
+                .collect(Collectors.toSet());
+    }
+
+    //Список команд без баллов:
+    //List of teams without points:
+    public static Set<String> getTeamsWithoutPoints(Map<String, List<Float>> map) {
+        return map.entrySet().stream()
+                .filter(entry -> (entry.getValue().stream()
+                        .filter(f -> f < 0.5f).count()) == entry.getValue().size())
+                .map(entry -> entry.getKey().split(" - ")[0])
+                .collect(Collectors.toSet());
+    }
+
+    //Список команд, которые имели ничейные результаты с заданной командой.
+    //List of teams that had a draw with a given team.
+    public static Set<String> findListTeamsThatDrawWithGivenTeam(Map<String, List<Float>> map,
+                                                                 String teamName) {
+        return map.entrySet().stream()
+                .filter(entry -> entry.getKey().split(" - ")[0].contains(teamName))
+                .filter(entry -> entry.getValue().contains(0.0f))
+                .map(entry -> entry.getKey().split(" - ")[1])
+                .collect(Collectors.toSet());
+    }
+
+    //Вывести результаты всех игр между двумя конкретными командами.
+    //Print the results of all games between two specific teams.
+    public static void printResultOfAllGamesSpecificTeams(Team<? extends Participant> team1,
+                                                          Team<? extends Participant> team2) {
+        String teamsNames = Game.coupleOfTeams(team1, team2);
+        String teamsNames1 = Game.coupleOfTeams(team2, team1);
+
+        if (Handler.getListGamingStatistics().containsKey(teamsNames)) {
+            Handler.getListGamingStatistics().entrySet().stream()
+                    .filter(entry -> entry.getKey().equals(teamsNames) || entry.getKey().equals(teamsNames1))
+                    .forEach(entry -> System.out.println(entry.getKey() + "\n" + entry.getValue()));
+
+        } else {
+            System.err.println("These teams did not play each other ");
+        }
+    }
+
+    //
+    public static <T extends Participant> Team<T> getTeam(Map<Team<T>, Float> map, int index) {
+        List<Team<T>> list = map.keySet().stream()
+                .toList();
+
+        if (index > map.size() - 1) {
+            System.err.println("There is no element with this index, I return random");
+            return list.get(RANDOM.nextInt(map.size() - 1));
+
+        } else {
+            return list.get(index);
+        }
+    }
+
+    //Сравнить две команды по средним баллам и среднему возрасту участников.
+    public static
 
 }

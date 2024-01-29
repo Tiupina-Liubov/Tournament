@@ -56,7 +56,7 @@ public class Game {
         return teams;
     }
 
-    private static <T extends Participant> void collectionStatisticalData(Team<T> team1, Team<T> team2,
+    private static <T extends Participant> void collectionStatisticalData(Team<T> team1, Team<T> team2,// todo dopisat statistiku dla map
                                                                           float couchTeam1,
                                                                           float couchTeam2) {
         String a = coupleOfTeams(team1, team2);
@@ -79,7 +79,7 @@ public class Game {
         }
     }
 
-    public static <T extends Participant> String coupleOfTeams(Team<T> team1, Team<T> team2) {
+    public static  String coupleOfTeams(Team<? extends Participant> team1, Team<? extends Participant> team2) {
         return team1.getName() + " - " + team2.getName();
     }
 
