@@ -46,6 +46,7 @@ public class Handler {
     public static void setMapPupil(Map<Team<Pupil>, Float> mapPupils) {
         if(mapPupil== null) {
             Handler.mapPupil = mapPupils;
+
         } else {
             Handler.mapPupil.putAll(mapPupils);
         }

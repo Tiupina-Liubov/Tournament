@@ -10,8 +10,6 @@ public class Team<T extends Participant> {
     private List<T> participants = new ArrayList<>();
     private Category category;
 
-
-
     public Team(String name, List<T> participants) {
         this.name = name;
         this.participants = participants;

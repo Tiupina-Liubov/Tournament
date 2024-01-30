@@ -68,6 +68,8 @@ public class Utility {
         return averageAgeTeams;
     }
 
+
+
     public static float averageValue(Collection<Float> list) {
         return list.stream()
                 .reduce(Float::sum)
@@ -399,7 +401,100 @@ public class Utility {
                     ", Average Age: " + entry.getKey().values().iterator().next() +
                     ", Float Value: " + entry.getValue());
         }
+    }
+
+    //Найти команды с наибольшим количеством ничьих результатов.
+    public static List<String> findTeamsWithMostTies(Map<String, List<Float>> map, int numberOfTeams) {
+        return map.entrySet().stream()
+                .map(entry ->
+                        entry.getKey().split(" - ")[0] + " = "
+                                + entry.getValue().stream()
+                                .filter(f -> f == 0.5)
+                                .count())
+                .distinct()
+                .sorted((str1, str2) -> {
+                    int count1 = Integer.parseInt(str1.split(" = ")[1]);
+                    int count2 = Integer.parseInt(str2.split(" = ")[1]);
+                    return Integer.compare(count2, count1);
+                })
+                .limit(numberOfTeams)
+                .toList();
+    }
+
+    //Определить команды с самой длинной последовательностью побед.
+    public static List<String> determineTeamsWithLongestWinningStreak(Map<String, List<Float>> map) {
+        return map.entrySet().stream()
+                .map(entry -> {
+                    String teamName = entry.getKey().split(" - ")[0];
+                    int maxStreak = 0;
+                    int currentStreak = 0;
+
+                    for (Float result : entry.getValue()) {
+                        if (result == 1) {
+                            currentStreak++;
+                            maxStreak = Math.max(maxStreak, currentStreak);
+                        } else {
+                            currentStreak = 0;
+                        }
+                    }
+                    return teamName + " = " + maxStreak;
+                })
+                .distinct()
+                .sorted((str1, str2) -> {
+                    int streak1 = Integer.parseInt(str1.split(" = ")[1]);
+                    int streak2 = Integer.parseInt(str2.split(" = ")[1]);
+                    return Integer.compare(streak2, streak1);
+                })
+                .toList();
+    }
+
+    //Создать комплексный отчет, включающий средний возраст команды,
+    // общее количество баллов, наибольшую победную серию, и сравнение с другими командами.
+    public static Map<String,List<String>> createComprehensiveReport(){
+       return  Handler.getTeamsMap().entrySet().stream()
+                .collect(Collectors.toMap(teamFloatEntry -> teamFloatEntry.getKey().getName(),
+                        teamFloatEntry -> new ArrayList<>(List.of("Average age of the team = "+averageAgeTeam(
+                                teamFloatEntry.getKey().getParticipants()),"Total points = "+teamFloatEntry.getValue(),
+                                "Longest winning streak = "+longestWinningStreak(Handler.getListGamingStatistics(),
+                                        teamFloatEntry.getKey().getName())))));
+
 
     }
+
+    private static int averageAgeTeam(List<Participant> list){
+        return list.stream()
+                .map(Participant::getAge)
+                .reduce((a,b)->(a+b)/list.size())
+                .orElse(0);
+
+    }
+
+    public static int longestWinningStreak(Map<String,List<Float>> map, String teamName){
+        return map.entrySet().stream()
+                .filter(entry -> entry.getKey().split(" - ")[0].equals(teamName))
+                .map(entry -> determineTeamsWithLongestWinningStreak( entry.getValue()))
+                .findFirst()
+                .orElse(0);
+
+
+
+    }
+
+        public static int determineTeamsWithLongestWinningStreak(List<Float> list) {
+            int maxStreak = 0;
+            int currentStreak = 0;
+
+            for (Float result : list) {
+                if (result == 1) {
+                    currentStreak++;
+                    maxStreak = Math.max(maxStreak, currentStreak);
+                } else {
+                    currentStreak = 0;
+                }
+            }
+
+            return maxStreak;
+        }
+
 }
 

@@ -3,12 +3,11 @@ package src;
 import src.blocks.Game;
 import src.blocks.Generator;
 import src.blocks.Handler;
-import src.enams.Category;
 import src.metods.Utility;
 import src.objectClass.*;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -55,7 +54,7 @@ public class Test {
         System.out.println(Utility.greatestTotalAge(Handler.getTeamsMap()));
 
         System.out.println("Команды с участниками в определенном возрастном диапазоне: ");
-        Utility.outputParticipantsCertainAgeRange(Handler.getTeamsMap(), 17, 35);
+        System.out.println(Utility.outputParticipantsCertainAgeRange(Handler.getTeamsMap(), 20, 35));
 
         System.out.println("Имена участников по убыванию возраста ");
         Utility.showParticipantsDescendingOrderAge(Handler.getAllParticipants());
@@ -88,13 +87,28 @@ public class Test {
         System.out.println("Список команд, которые имели ничейные результаты с заданной командой - " + teamName);
         System.out.println(Utility.findListTeamsThatDrawWithGivenTeam(Handler.getListGamingStatistics(), teamName));
 
-        System.out.println("Вывести результаты всех игр между двумя конкретными командами.");
+        System.out.println("Вывести результаты всех игр между двумя конкретными командами.");// todo bybod gut ubraty lischnee
         Team<Adult> adultTeam = Utility.getTeam(Handler.getMapAdult(), 4);
         Team<Adult> adultTeam1 = Utility.getTeam(Handler.getMapAdult(), 1);
         Utility.printResultOfAllGamesSpecificTeams(adultTeam, adultTeam1);
 
         System.out.println("Сравнить две команды по  баллам и среднему возрасту участников.");
-        Utility.compareTwoTeamsPointsAndMiddleAge(adultTeam1.getName(),adultTeam.getName());
+        Utility.compareTwoTeamsPointsAndMiddleAge(adultTeam1.getName(), adultTeam.getName());
+
+        System.out.println("Найти команды с наибольшим количеством ничьих результатов.");
+        System.out.println(Utility.findTeamsWithMostTies(Handler.getListGamingStatistics(),
+                Handler.getListGamingStatistics().size()));
+
+        System.out.println("Определить команды с самой длинной последовательностью побед.");
+        System.out.println(Utility.determineTeamsWithLongestWinningStreak(Handler.getListGamingStatistics()));
+
+        System.out.println("Создать комплексный отчет, включающий средний возраст команды, общее количество баллов," +
+                " наибольшую победную серию, и сравнение с другими командами.");
+        for (Map.Entry<String, List<String>> map:Utility.createComprehensiveReport().entrySet()){
+            System.out.println(map.getKey()+ "\n"+ map.getValue());
+        }
+
+
 
 
     }
